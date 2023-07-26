@@ -27,7 +27,7 @@ name = "export"
 required-features = ["export"]
 
 [features]
-default = ["serde", "typescript"]
+default = ["serde", "typescript", "export"]
 
 ##! Internal Features
 ## Support for exporting the types of Rust functions.

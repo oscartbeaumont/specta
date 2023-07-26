@@ -8,7 +8,7 @@ error: specta: trait objects are not currently supported.
   --> tests/macro/compile_error.rs:13:34
    |
 13 |     pub(crate) cause: Option<Box<dyn std::error::Error + Send + Sync>>,
-   |                                  ^^^
+   |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: specta: Found unsupported container attribute 'noshot'
   --> tests/macro/compile_error.rs:75:10

@@ -27,6 +27,7 @@ impl TupleType {
             export: None,
             deprecated: None,
             item: NamedDataTypeItem::Tuple(self),
+            module_path: None,
         }
     }
 }

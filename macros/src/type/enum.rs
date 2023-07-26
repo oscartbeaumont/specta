@@ -168,6 +168,7 @@ pub fn parse_enum(
                             fields: vec![#(#fields),*],
                             generics: vec![],
                             tag: None,
+                            module_path: Some(<Self as #crate_ref::Type>::MODULE_PATH)
                         }))
                     }
                 },
@@ -245,7 +246,9 @@ pub fn parse_enum(
                 name: #name,
                 sid: SID,
                 generics: vec![#(#reference_generics),*],
+                module_path: <Self as #crate_ref::Type>::MODULE_PATH
             })
+
         },
         can_flatten,
     ))

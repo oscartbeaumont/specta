@@ -23,8 +23,11 @@ pub fn export<T: NamedType>(conf: &ExportConfiguration) -> Result<String, TsExpo
         })?,
     );
 
-    if let Some((ty_name, l0, l1)) = detect_duplicate_type_names(&type_name).into_iter().next() {
-        return Err(TsExportError::DuplicateTypeName(ty_name, l0, l1));
+    if conf.modules == ModuleExportBehavior::Disabled {
+        if let Some((ty_name, l0, l1)) = detect_duplicate_type_names(&type_name).into_iter().next()
+        {
+            return Err(TsExportError::DuplicateTypeName(ty_name, l0, l1));
+        }
     }
 
     result
@@ -46,8 +49,11 @@ pub fn inline<T: Type>(conf: &ExportConfiguration) -> Result<String, TsExportErr
         )?,
     );
 
-    if let Some((ty_name, l0, l1)) = detect_duplicate_type_names(&type_name).into_iter().next() {
-        return Err(TsExportError::DuplicateTypeName(ty_name, l0, l1));
+    if conf.modules == ModuleExportBehavior::Disabled {
+        if let Some((ty_name, l0, l1)) = detect_duplicate_type_names(&type_name).into_iter().next()
+        {
+            return Err(TsExportError::DuplicateTypeName(ty_name, l0, l1));
+        }
     }
 
     result
@@ -71,11 +77,21 @@ fn export_datatype_inner(
         name,
         comments,
         item,
+        module_path,
         ..
     }: &NamedDataType,
 ) -> Result<String, TsExportError> {
+    // let out_temp: Vec<String> = module_path.iter().map(|m| m.to_string()).collect();
+    // let mut out = out_temp.join("_");
+    // out.push_str(name);
+
+    let module_path = String::from(module_path.unwrap_or(""));
+    let mut module_path = module_path.replace("::", "_");
+    module_path.push('_');
+    module_path.push_str(name);
+
     let ctx = ctx.with(PathItem::Type(name));
-    let name = sanitise_type_name(ctx.clone(), NamedLocation::Type, name)?;
+    let name = sanitise_type_name(ctx.clone(), NamedLocation::Type, &module_path)?;
 
     let inline_ts = datatype_inner(
         ctx.clone(),
@@ -114,6 +130,7 @@ fn export_datatype_inner(
         .comment_exporter
         .map(|v| v(comments))
         .unwrap_or_default();
+
     Ok(format!(
         "{comments}export type {name}{generics} = {inline_ts}"
     ))
@@ -129,7 +146,7 @@ pub fn datatype(conf: &ExportConfiguration, typ: &DataType) -> Result<String, Ts
 }
 
 fn datatype_inner(ctx: ExportContext, typ: &DataType) -> Result<String, TsExportError> {
-    Ok(match &typ {
+    let result = match &typ {
         DataType::Any => "any".into(),
         DataType::Primitive(p) => {
             let ctx = ctx.with(PathItem::Type(p.to_rust_str()));
@@ -204,20 +221,34 @@ fn datatype_inner(ctx: ExportContext, typ: &DataType) -> Result<String, TsExport
             ..
         }) => enum_datatype(ctx.with(PathItem::Type(name)), Some(name), item)?,
         DataType::Enum(item) => enum_datatype(ctx, None, item)?,
-        DataType::Reference(DataTypeReference { name, generics, .. }) => match &generics[..] {
-            [] => name.to_string(),
-            generics => {
-                let generics = generics
-                    .iter()
-                    .map(|v| datatype_inner(ctx.with(PathItem::Type(name)), v))
-                    .collect::<Result<Vec<_>, _>>()?
-                    .join(", ");
+        DataType::Reference(DataTypeReference {
+            name,
+            generics,
+            module_path,
+            ..
+        }) => {
+            let mut updated_name = module_path.to_string();
+            updated_name = updated_name.replace("::", "_");
+            updated_name.push('_');
+            updated_name.push_str(name);
 
-                format!("{name}<{generics}>")
+            match &generics[..] {
+                [] => updated_name,
+                generics => {
+                    let generics = generics
+                        .iter()
+                        .map(|v| datatype_inner(ctx.with(PathItem::Type(name)), v))
+                        .collect::<Result<Vec<_>, _>>()?
+                        .join(", ");
+
+                    format!("{updated_name}<{generics}>")
+                }
             }
-        },
+        }
         DataType::Generic(GenericType(ident)) => ident.to_string(),
-    })
+    };
+
+    Ok(result)
 }
 
 fn tuple_datatype(ctx: ExportContext, fields: &[DataType]) -> Result<String, TsExportError> {
@@ -237,7 +268,12 @@ fn tuple_datatype(ctx: ExportContext, fields: &[DataType]) -> Result<String, TsE
 fn object_datatype(
     ctx: ExportContext,
     name: Option<&'static str>,
-    ObjectType { fields, tag, .. }: &ObjectType,
+    ObjectType {
+        fields,
+        tag,
+        module_path,
+        ..
+    }: &ObjectType,
 ) -> Result<String, TsExportError> {
     match &fields[..] {
         [] => Ok("null".to_string()),
@@ -257,9 +293,14 @@ fn object_datatype(
                 .map(|f| object_field_to_ts(ctx.with(PathItem::Field(f.key)), f))
                 .collect::<Result<Vec<_>, _>>()?;
 
+            let module_string = match module_path {
+                Some(path) => path.to_string(),
+                None => String::new(),
+            };
+
             if let Some(tag) = tag {
                 unflattened_fields.push(format!(
-                    "{tag}: \"{}\"",
+                    "{module_string}{tag}: \"{}\"",
                     name.ok_or_else(|| TsExportError::UnableToTagUnnamedType(ctx.export_path()))?
                 ));
             }

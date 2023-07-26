@@ -22,24 +22,32 @@ const _: () = {
 };
 
 impl<'a> Type for &'a str {
+    const MODULE_PATH: &'static str = module_path!();
+
     fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
         String::inline(opts, generics)
     }
 }
 
 impl<'a, T: Type + 'static> Type for &'a T {
+    const MODULE_PATH: &'static str = module_path!();
+
     fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
         T::inline(opts, generics)
     }
 }
 
 impl<T: Type> Type for [T] {
+    const MODULE_PATH: &'static str = module_path!();
+
     fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
         T::inline(opts, generics)
     }
 }
 
 impl<'a, T: ?Sized + ToOwned + Type + 'static> Type for std::borrow::Cow<'a, T> {
+    const MODULE_PATH: &'static str = module_path!();
+
     fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
         T::inline(opts, generics)
     }
@@ -113,6 +121,8 @@ impl_for_list!(
 );
 
 impl<'a, T: Type> Type for &'a [T] {
+    const MODULE_PATH: &'static str = module_path!();
+
     fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
         <Vec<T>>::inline(opts, generics)
     }
@@ -123,6 +133,8 @@ impl<'a, T: Type> Type for &'a [T] {
 }
 
 impl<const N: usize, T: Type> Type for [T; N] {
+    const MODULE_PATH: &'static str = module_path!();
+
     fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
         <Vec<T>>::inline(opts, generics)
     }
@@ -133,6 +145,8 @@ impl<const N: usize, T: Type> Type for [T; N] {
 }
 
 impl<T: Type> Type for Option<T> {
+    const MODULE_PATH: &'static str = module_path!();
+
     fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
         Ok(DataType::Nullable(Box::new(
             generics
@@ -153,6 +167,8 @@ impl<T: Type> Type for Option<T> {
 }
 
 impl<T: Type> Type for std::ops::Range<T> {
+    const MODULE_PATH: &'static str = module_path!();
+
     fn inline(opts: DefOpts, _generics: &[DataType]) -> Result<DataType, ExportError> {
         let ty = T::definition(opts)?;
         Ok(DataType::Object(ObjectType {
@@ -172,11 +188,14 @@ impl<T: Type> Type for std::ops::Range<T> {
                 },
             ],
             tag: None,
+            module_path: None,
         }))
     }
 }
 
 impl<T: Type> Type for std::ops::RangeInclusive<T> {
+    const MODULE_PATH: &'static str = module_path!();
+
     fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
         std::ops::Range::<T>::inline(opts, generics) // Yeah Serde are cringe
     }
@@ -218,6 +237,8 @@ const _: () = {
     impl<K: Type, V: Type> Flatten for serde_json::Map<K, V> {}
 
     impl Type for serde_json::Value {
+        const MODULE_PATH: &'static str = module_path!();
+
         fn inline(_: DefOpts, _: &[DataType]) -> Result<DataType, ExportError> {
             Ok(DataType::Any)
         }
@@ -242,6 +263,8 @@ const _: () = {
     );
 
     impl<T: TimeZone> Type for DateTime<T> {
+        const MODULE_PATH: &'static str = module_path!();
+
         fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
             String::inline(opts, generics)
         }
@@ -249,6 +272,8 @@ const _: () = {
 
     #[allow(deprecated)]
     impl<T: TimeZone> Type for Date<T> {
+        const MODULE_PATH: &'static str = module_path!();
+
         fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
             String::inline(opts, generics)
         }

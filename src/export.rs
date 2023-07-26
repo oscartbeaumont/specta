@@ -1,4 +1,4 @@
-use crate::ts::{ExportConfiguration, TsExportError};
+use crate::ts::{ExportConfiguration, ModuleExportBehavior, TsExportError};
 use crate::*;
 use once_cell::sync::Lazy;
 use std::collections::{BTreeMap, BTreeSet};
@@ -46,7 +46,7 @@ pub fn ts_with_cfg(path: &str, conf: &ExportConfiguration) -> Result<(), TsExpor
                 if let Some((existing_sid, existing_impl_location)) =
                     map.insert(dt.name, (sid, dt.impl_location))
                 {
-                    if existing_sid != sid {
+                    if existing_sid != sid && conf.modules == ModuleExportBehavior::Disabled {
                         return Err(TsExportError::DuplicateTypeName(
                             dt.name,
                             dt.impl_location,

@@ -7,12 +7,23 @@ use specta::{
 #[derive(Type)]
 pub struct TypeOne {
     pub field1: String,
-    pub field2: TypeTwo,
+    pub field2: two::TypeTwo,
+    pub field3: two::TypeThree,
 }
 
-#[derive(Type)]
-pub struct TypeTwo {
-    pub my_field: String,
+mod two {
+    use super::*;
+
+    #[derive(Type)]
+    pub struct TypeThree {
+        pub field1: String,
+        // pub field2: TypeTwo,
+    }
+
+    #[derive(Type)]
+    pub struct TypeTwo {
+        pub my_field: String,
+    }
 }
 
 fn main() {

@@ -18,6 +18,7 @@ pub struct ObjectType {
     pub generics: Vec<&'static str>,
     pub fields: Vec<ObjectField>,
     pub tag: Option<&'static str>,
+    pub module_path: Option<&'static str>,
 }
 
 impl ObjectType {
@@ -37,6 +38,7 @@ impl ObjectType {
             comments: &[],
             export: None,
             deprecated: None,
+            module_path: self.module_path,
             item: NamedDataTypeItem::Object(self),
         }
     }

@@ -15,6 +15,7 @@ pub struct ContainerAttr {
     pub export: Option<bool>, // Option is used because if not explicitly set, we enable it
     pub doc: Vec<String>,
     pub deprecated: Option<String>,
+    pub module_path: Option<&'static str>,
 }
 
 impl_parse! {

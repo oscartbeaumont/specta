@@ -24,6 +24,13 @@ pub enum BigIntExportBehavior {
     FailWithReason(&'static str),
 }
 
+#[derive(Default, PartialEq, Eq)]
+pub enum ModuleExportBehavior {
+    Enabled,
+    #[default]
+    Disabled,
+}
+
 /// The signature for a function responsible for exporting Typescript comments.
 pub type CommentFormatterFn = fn(&[&str]) -> String;
 

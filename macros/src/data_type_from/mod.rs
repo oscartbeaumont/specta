@@ -60,7 +60,8 @@ pub fn derive(input: proc_macro::TokenStream) -> syn::Result<proc_macro::TokenSt
                                 generics: vec![],
                                 fields: vec![#(#fields),*],
                                 tag: None,
-                            }
+                                module_path: None,
+                        }
                         }
                     }
 

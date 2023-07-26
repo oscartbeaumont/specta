@@ -168,6 +168,7 @@ pub fn parse_struct(
                             generics: vec![#(#definition_generics),*],
                             fields: vec![#(#fields),*],
                             tag: #tag,
+                            module_path: Some(PATH_MACRO),
                         }
                     )
                 },
@@ -290,6 +291,7 @@ pub fn parse_struct(
                 name: #name,
                 sid: SID,
                 generics: vec![#(#reference_generics),*],
+                module_path: <Self as #crate_ref::Type>::MODULE_PATH
             })
         }
     };

@@ -69,6 +69,8 @@ pub struct NamedDataType {
     pub deprecated: Option<&'static str>,
     /// the actual type definition.
     pub item: NamedDataTypeItem,
+    /// A string containing the module path for the given struct. Used for namespace-based exporting
+    pub module_path: Option<&'static str>,
 }
 
 impl From<NamedDataType> for DataType {
@@ -103,6 +105,7 @@ pub struct DataTypeReference {
     pub name: &'static str,
     pub sid: TypeSid,
     pub generics: Vec<DataType>,
+    pub module_path: &'static str,
 }
 
 /// A generic parameter to another type.

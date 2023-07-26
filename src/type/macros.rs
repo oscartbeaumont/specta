@@ -1,6 +1,8 @@
 macro_rules! impl_primitives {
     ($($i:ident)+) => {$(
         impl Type for $i {
+            const MODULE_PATH: &'static str = module_path!();
+
             fn inline(_: DefOpts, _: &[DataType]) -> Result<DataType, ExportError> {
                 Ok(DataType::Primitive(datatype::PrimitiveType::$i))
             }
@@ -15,6 +17,8 @@ macro_rules! impl_tuple {
     ( impl $($i:ident),* ) => {
         #[allow(non_snake_case)]
         impl<$($i: Type + 'static),*> Type for ($($i),*) {
+            const MODULE_PATH: &'static str = module_path!();
+
             #[allow(unused)]
             fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
                 let mut _generics = generics.iter();
@@ -49,6 +53,8 @@ macro_rules! impl_tuple {
 macro_rules! impl_containers {
     ($($container:ident)+) => {$(
         impl<T: Type> Type for $container<T> {
+            const MODULE_PATH: &'static str = module_path!();
+
             fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
                 generics.get(0).cloned().map_or_else(
                     || {
@@ -79,6 +85,8 @@ macro_rules! impl_containers {
 macro_rules! impl_as {
     ($($ty:path as $tty:ident)+) => {$(
         impl Type for $ty {
+            const MODULE_PATH: &'static str = module_path!();
+
             fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
                 <$tty as Type>::inline(opts, generics)
             }
@@ -93,6 +101,8 @@ macro_rules! impl_as {
 macro_rules! impl_for_list {
     ($($ty:path as $name:expr)+) => {$(
         impl<T: Type> Type for $ty {
+            const MODULE_PATH: &'static str = module_path!();
+
             fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
                 Ok(DataType::List(Box::new(generics.get(0).cloned().unwrap_or(T::inline(
                     opts,
@@ -118,6 +128,8 @@ macro_rules! impl_for_list {
 macro_rules! impl_for_map {
     ($ty:path as $name:expr) => {
         impl<K: Type, V: Type> Type for $ty {
+            const MODULE_PATH: &'static str = module_path!();
+
             fn inline(opts: DefOpts, generics: &[DataType]) -> Result<DataType, ExportError> {
                 Ok(DataType::Record(Box::new((
                     generics.get(0).cloned().map_or_else(

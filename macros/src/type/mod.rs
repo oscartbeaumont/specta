@@ -141,8 +141,12 @@ pub fn derive(
             const SID: #crate_name::TypeSid = #crate_name::sid!(@with_specta_path; #name; #crate_name);
             const IMPL_LOCATION: #crate_name::ImplLocation = #crate_name::impl_location!(@with_specta_path; #crate_name);
 
+            const PATH_MACRO: &str = module_path!();
+
             #[automatically_derived]
             #type_impl_heading {
+                const MODULE_PATH: &'static str = module_path!();
+                
                 fn inline(opts: #crate_name::DefOpts, generics: &[#crate_name::DataType]) -> std::result::Result<#crate_name::DataType, #crate_name::ExportError> {
                     Ok(#crate_name::DataType::Named(<Self as #crate_name::NamedType>::named_data_type(opts, generics)?))
                 }
@@ -190,6 +194,11 @@ pub fn named_data_type_wrapper(
         None => quote!(None),
     };
 
+    let module_path = match &container_attrs.module_path {
+        Some(path) => quote!(Some(#path)),
+        None => quote!(Some(PATH_MACRO)),
+    };
+
     quote! {
         #crate_ref::NamedDataType {
             name: #name,
@@ -198,6 +207,7 @@ pub fn named_data_type_wrapper(
             comments: #comments,
             export: #should_export,
             deprecated: #deprecated,
+            module_path: #module_path,
             item: #t
         }
     }
