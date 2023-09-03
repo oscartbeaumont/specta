@@ -71,6 +71,7 @@ pub mod export;
 #[cfg(feature = "functions")]
 #[cfg_attr(docsrs, doc(cfg(feature = "functions")))]
 pub mod functions;
+mod json;
 mod lang;
 mod selection;
 mod static_types;
@@ -83,6 +84,10 @@ pub use lang::*;
 pub use r#type::*;
 pub use selection::*;
 pub use static_types::*;
+
+#[cfg(feature = "serde")]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+pub use json::*;
 
 /// Implements [`Type`] for a given struct or enum.
 ///

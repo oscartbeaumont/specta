@@ -22,7 +22,7 @@ macro_rules! assert_ts {
 
     (() => $expr:expr, $e:expr) => {
         let _: () = {
-            fn assert_ty_eq<T: Type>(_t: T) {
+            fn assert_ty_eq<T: specta::Type>(_t: T) {
                 assert_eq!(specta::ts::inline::<T>(&Default::default()), Ok($e.into()));
             }
             assert_ty_eq($expr);
