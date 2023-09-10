@@ -3,10 +3,8 @@ use crate::*;
 #[macro_use]
 mod macros;
 mod impls;
-mod post_process;
 mod specta_id;
 
-pub use post_process::*;
 pub use specta_id::*;
 
 use self::reference::Reference;

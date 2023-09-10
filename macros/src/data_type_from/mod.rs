@@ -65,7 +65,7 @@ pub fn derive(input: proc_macro::TokenStream) -> syn::Result<proc_macro::TokenSt
                     #[automatically_derived]
                     impl From<#ident> for #crate_ref::StructType {
                         fn from(t: #ident) -> #crate_ref::StructType {
-                            #crate_ref::internal::construct::r#struct(#struct_name.into(), vec![], #crate_ref::internal::construct::struct_named(vec![#(#fields),*], None))
+                            #crate_ref::internal::construct::r#struct(#struct_name, vec![], #crate_ref::internal::construct::struct_named(vec![#(#fields),*], None))
                         }
                     }
 

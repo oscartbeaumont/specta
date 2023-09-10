@@ -102,9 +102,9 @@ pub fn derive(input: proc_macro::TokenStream) -> syn::Result<proc_macro::TokenSt
 
         quote! {
             #[allow(non_snake_case)]
-            #[#crate_ref::internal::ctor::ctor]
+            #[#crate_ref::internal::__specta_ctor]
             fn #export_fn_name() {
-                #crate_ref::export::register_ty::<#ident<#(#generic_params),*>>();
+                #crate_ref::internal::export::register_ty::<#ident<#(#generic_params),*>>();
             }
         }
     });
@@ -152,7 +152,7 @@ pub fn derive(input: proc_macro::TokenStream) -> syn::Result<proc_macro::TokenSt
 
                 fn named_data_type(opts: #crate_ref::DefOpts, generics: &[#crate_ref::DataType]) -> #crate_ref::NamedDataType {
                     #crate_ref::internal::construct::named_data_type(
-                        #name.into(),
+                        #name,
                         #comments,
                         #deprecated,
                         SID,

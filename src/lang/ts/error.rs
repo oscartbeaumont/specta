@@ -3,7 +3,7 @@ use std::borrow::Cow;
 
 use thiserror::Error;
 
-use crate::{ImplLocation, SerdeError};
+use crate::{advanced::SerdeError, ImplLocation};
 
 use super::ExportPath;
 

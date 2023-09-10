@@ -4,11 +4,10 @@
 //! You shouldn't need to use this crate directly.
 //! Checkout [Specta](https://docs.rs/specta).
 //!
+
 #[macro_use]
 mod utils;
 mod data_type_from;
-#[cfg(feature = "functions")]
-mod fn_datatype;
 #[cfg(feature = "functions")]
 mod specta;
 mod r#type;
@@ -30,14 +29,4 @@ pub fn specta(
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     specta::attribute(item).unwrap_or_else(|err| err.into_compile_error().into())
-}
-
-#[proc_macro]
-#[cfg(feature = "functions")]
-pub fn fn_datatype(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    use syn::parse_macro_input;
-
-    fn_datatype::proc_macro(parse_macro_input!(input as fn_datatype::FnDatatypeInput))
-        .unwrap_or_else(|err| err.into_compile_error())
-        .into()
 }

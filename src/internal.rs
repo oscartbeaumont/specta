@@ -4,11 +4,24 @@
 //!
 //! DO NOT USE THEM! You have been warned!
 
+// Renaming the export so it's less likely to end up in LSP hints
+
 #[cfg(feature = "export")]
-pub use ctor;
+pub use ctor::ctor as __specta_ctor;
+
+pub use paste::paste as __specta_paste;
 
 #[cfg(feature = "functions")]
-pub use specta_macros::fn_datatype;
+mod function_args;
+#[cfg(feature = "functions")]
+mod function_result;
+
+/// Traits used by the `specta` macro to infer type information from functions.
+#[cfg(feature = "functions")]
+pub mod functions {
+    pub use super::function_args::FunctionArg;
+    pub use super::function_result::FunctionOutput;
+}
 
 /// Functions used to construct `crate::datatype` types (they have private fields so can't be constructed directly).
 /// We intentionally keep their fields private so we can modify them without a major version bump.
@@ -27,12 +40,12 @@ pub mod construct {
     }
 
     pub const fn r#struct(
-        name: Cow<'static, str>,
+        name: &'static str,
         generics: Vec<GenericType>,
         fields: StructFields,
     ) -> StructType {
         StructType {
-            name,
+            name: Cow::Borrowed(name),
             generics,
             fields,
         }
@@ -54,13 +67,13 @@ pub mod construct {
     }
 
     pub const fn r#enum(
-        name: Cow<'static, str>,
+        name: &'static str,
         repr: EnumRepr,
         generics: Vec<GenericType>,
         variants: Vec<(Cow<'static, str>, EnumVariant)>,
     ) -> EnumType {
         EnumType {
-            name,
+            name: Cow::Borrowed(name),
             repr,
             generics,
             variants,
@@ -83,18 +96,21 @@ pub mod construct {
     }
 
     pub const fn named_data_type(
-        name: Cow<'static, str>,
+        name: &'static str,
         comments: Vec<Cow<'static, str>>,
-        deprecated: Option<Cow<'static, str>>,
+        deprecated: Option<&'static str>,
         sid: SpectaID,
         impl_location: ImplLocation,
         export: Option<bool>,
         inner: DataType,
     ) -> NamedDataType {
         NamedDataType {
-            name,
+            name: Cow::Borrowed(name),
             comments,
-            deprecated,
+            deprecated: match deprecated {
+                Some(msg) => Some(Cow::Borrowed(msg)),
+                None => None,
+            },
             ext: Some(NamedDataTypeExt {
                 sid,
                 impl_location,
@@ -105,12 +121,12 @@ pub mod construct {
     }
 
     pub const fn data_type_reference(
-        name: Cow<'static, str>,
+        name: &'static str,
         sid: SpectaID,
         generics: Vec<DataType>,
     ) -> DataTypeReference {
         DataTypeReference {
-            name,
+            name: Cow::Borrowed(name),
             sid,
             generics,
         }
@@ -149,5 +165,54 @@ pub mod construct {
         }
 
         SpectaID { type_name, hash }
+    }
+
+    // TODO: Macros take in `&'static str` and then `Cow` inside here -> Do for all of them!
+
+    #[cfg(feature = "functions")]
+    pub fn function(export_fn: crate::ExportFn) -> crate::Function {
+        crate::Function { export_fn }
+    }
+
+    #[cfg(feature = "functions")]
+    pub fn function_type(
+        asyncness: bool,
+        name: &'static str,
+        args: Vec<(&'static str, Option<DataType>)>,
+        result: DataType,
+        docs: Vec<Cow<'static, str>>,
+    ) -> FunctionType {
+        FunctionType {
+            asyncness,
+            name: Cow::Borrowed(name),
+            args: args
+                .into_iter()
+                .filter_map(|(name, ty)| ty.map(|ty| (Cow::Borrowed(name), ty)))
+                .collect(),
+            result,
+            docs,
+        }
+    }
+}
+
+/// Internal functions used by the macros for the export feature.
+#[cfg(feature = "export")]
+pub mod export {
+    use std::sync::PoisonError;
+
+    use crate::{export::TYPES, DefOpts, Type};
+
+    // Called within ctor functions to register a type.
+    pub fn register_ty<T: Type>() {
+        let type_map = &mut *TYPES.write().unwrap_or_else(PoisonError::into_inner);
+
+        // We call this for it's side effects on the `type_map`
+        T::reference(
+            DefOpts {
+                parent_inline: false,
+                type_map,
+            },
+            &[],
+        );
     }
 }

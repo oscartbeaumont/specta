@@ -228,7 +228,7 @@ pub fn parse_struct(
             Fields::Unit => quote!(#crate_ref::internal::construct::struct_unit()),
         };
 
-        quote!(#crate_ref::DataType::Struct(#crate_ref::internal::construct::r#struct(#name.into(), vec![#(#definition_generics),*], #fields)))
+        quote!(#crate_ref::DataType::Struct(#crate_ref::internal::construct::r#struct(#name, vec![#(#definition_generics),*], #fields)))
     };
 
  
@@ -242,7 +242,7 @@ pub fn parse_struct(
         quote!({
             let generics = vec![#(#reference_generics),*];
             #crate_ref::reference::reference::<Self>(opts, &generics, #crate_ref::internal::construct::data_type_reference(
-                #name.into(),
+                #name,
                 SID,
                 generics.clone() // TODO: This `clone` is cringe
             ))

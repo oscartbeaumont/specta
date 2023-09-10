@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use specta::{SerdeError, Type};
+use specta::{advanced::SerdeError, Type};
 
 use crate::ts::assert_ts;
 

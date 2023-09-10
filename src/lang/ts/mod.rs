@@ -14,7 +14,10 @@ pub use export_config::*;
 pub use formatter::*;
 use reserved_terms::*;
 
-use crate::*;
+use crate::{
+    advanced::{detect_duplicate_type_names, is_valid_ty},
+    *,
+};
 
 #[allow(missing_docs)]
 pub type Result<T> = std::result::Result<T, TsExportError>;

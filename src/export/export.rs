@@ -3,7 +3,7 @@ use once_cell::sync::Lazy;
 use std::sync::{PoisonError, RwLock, RwLockReadGuard};
 
 // Global type store for collecting custom types to export.
-static TYPES: Lazy<RwLock<TypeMap>> = Lazy::new(Default::default);
+pub(crate) static TYPES: Lazy<RwLock<TypeMap>> = Lazy::new(Default::default);
 
 /// A lock type for iterating over the internal type map.
 ///
@@ -33,19 +33,4 @@ pub fn get_types() -> TypesIter {
         index: 0,
         lock: types,
     }
-}
-
-// Called within ctor functions to register a type.
-#[doc(hidden)]
-pub fn register_ty<T: Type>() {
-    let type_map = &mut *TYPES.write().unwrap_or_else(PoisonError::into_inner);
-
-    // We call this for it's side effects on the `type_map`
-    T::reference(
-        DefOpts {
-            parent_inline: false,
-            type_map,
-        },
-        &[],
-    );
 }

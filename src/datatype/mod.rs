@@ -5,6 +5,8 @@ use std::{
 
 mod r#enum;
 mod fields;
+#[cfg(feature = "functions")]
+mod function;
 mod literal;
 mod named;
 mod primitive;
@@ -12,6 +14,9 @@ mod r#struct;
 mod tuple;
 
 pub use fields::*;
+#[cfg(feature = "functions")]
+#[cfg_attr(docsrs, doc(cfg(feature = "functions")))]
+pub use function::*;
 pub use literal::*;
 pub use named::*;
 pub use primitive::*;

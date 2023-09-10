@@ -202,11 +202,11 @@ pub fn parse_enum(
     };
 
     Ok((
-        quote!(#crate_ref::DataType::Enum(#crate_ref::internal::construct::r#enum(#name.into(), #repr, vec![#(#definition_generics),*], vec![#(#variant_types),*]))),
+        quote!(#crate_ref::DataType::Enum(#crate_ref::internal::construct::r#enum(#name, #repr, vec![#(#definition_generics),*], vec![#(#variant_types),*]))),
         quote!({
             let generics = vec![#(#reference_generics),*];
             #crate_ref::reference::reference::<Self>(opts, &generics, #crate_ref::internal::construct::data_type_reference(
-                #name.into(),
+                #name,
                 SID,
                 generics.clone() // TODO: This `clone` is cringe
             ))

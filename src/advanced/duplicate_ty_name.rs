@@ -3,7 +3,6 @@ use std::{borrow::Cow, collections::HashMap};
 use crate::{ImplLocation, TypeMap};
 
 /// post process the type map to detect duplicate type names
-#[doc(hidden)]
 pub fn detect_duplicate_type_names(
     type_map: &TypeMap,
 ) -> Vec<(Cow<'static, str>, ImplLocation, ImplLocation)> {
