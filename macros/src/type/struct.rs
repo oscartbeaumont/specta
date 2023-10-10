@@ -121,14 +121,6 @@ pub fn parse_struct(
                     let field_attrs = decode_field_attrs(field)?;
                     let field_ty = field_attrs.r#type.as_ref().unwrap_or(&field.ty);
 
-                    let ty = construct_datatype(
-                        format_ident!("ty"),
-                        field_ty,
-                        &generic_idents,
-                        crate_ref,
-                        field_attrs.inline,
-                    )?;
-
                     let field_ident_str = unraw_raw_ident(field.ident.as_ref().unwrap());
 
                     let field_name = match (field_attrs.rename.clone(), container_attrs.rename_all) {
@@ -147,34 +139,46 @@ pub fn parse_struct(
                         .then(|| quote!(true))
                         .unwrap_or(parent_inline.clone());
 
-                    let ty = if field_attrs.flatten {
-                        quote! {
-                            #[allow(warnings)]
-                            {
-                                #ty
-                            }
 
-                            fn validate_flatten<T: #crate_ref::Flatten>() {}
-                            validate_flatten::<#field_ty>();
+                    let ty = field_attrs.skip.then(|| Ok(quote!(None)))
+                        .unwrap_or_else(|| {
+                            construct_datatype(
+                                format_ident!("ty"),
+                                field_ty,
+                                &generic_idents,
+                                crate_ref,
+                                field_attrs.inline,
+                            ).map(|ty| {
+	                            let ty = if field_attrs.flatten {
+	                                quote! {
+	                                    #[allow(warnings)]
+	                                    {
+	                                        #ty
+	                                    }
 
-                            let mut ty = <#field_ty as #crate_ref::Type>::inline(#crate_ref::DefOpts {
-                                parent_inline: #parent_inline,
-                                type_map: opts.type_map
-                            }, &generics);
+	                                    fn validate_flatten<T: #crate_ref::Flatten>() {}
+	                                    validate_flatten::<#field_ty>();
 
-                            ty
-                        }
-                    } else {
-                        quote! {
-                            #ty
+	                                    let mut ty = <#field_ty as #crate_ref::Type>::inline(#crate_ref::DefOpts {
+	                                        parent_inline: #parent_inline,
+	                                        type_map: opts.type_map
+	                                    }, &generics);
 
-                            ty
-                        }
-                    };
+	                                    ty
+	                                }
+	                            } else {
+	                                quote! {
+	                                    #ty
 
-                    let ty = then_option(field_attrs.skip, quote! {{
-                    	#ty
-                    }});
+	                                    ty
+	                                }
+	                            };
+
+	                            quote! {Some({
+	                            	#ty
+	                            })}
+                            })
+                        })?;
 
                     Ok(quote!((#field_name.into(), #crate_ref::internal::construct::field(
                         #optional,
@@ -201,24 +205,27 @@ pub fn parse_struct(
                         let field_attrs = decode_field_attrs(field)?;
                         let field_ty = field_attrs.r#type.as_ref().unwrap_or(&field.ty);
 
-                        let generic_vars = construct_datatype(
-                            format_ident!("gen"),
-                            field_ty,
-                            &generic_idents,
-                            crate_ref,
-                            field_attrs.inline,
-                        )?;
-
                         let deprecated = field_attrs.common.deprecated_as_tokens(crate_ref);
                         let optional = field_attrs.optional;
                         let flatten = field_attrs.flatten;
                         let doc = field_attrs.common.doc;
 
-                        let ty = then_option(field_attrs.skip, quote! {{
-                        	#generic_vars
+                        let ty = field_attrs.skip.then(|| Ok(quote!(None)))
+                            .unwrap_or_else(|| {
+                                construct_datatype(
+                                    format_ident!("gen"),
+                                    field_ty,
+                                    &generic_idents,
+                                    crate_ref,
+                                    field_attrs.inline,
+                                ).map(|generic_vars| {
+                                    quote! {{
+		                               	#generic_vars
 
-                         	gen
-                        }});
+		                               	Some(gen)
+		                            }}
+                                })
+                            })?;
 
                         Ok(quote!(#crate_ref::internal::construct::field(#optional, #flatten, #deprecated, #doc.into(), #ty)))
                     })
