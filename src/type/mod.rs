@@ -19,6 +19,8 @@ pub trait Type {
     // TODO: `generics` holds two purposes.
     // - It allows "filling" in the type of the generic slot on an upstream type.
     // - When not provided it will infer the types from the local generics.
+    //
+    // Based on `inline` vs `definition` vs `reference` can we just have different implementations to achieve the same affect?
 
     /// Returns the inline definition of a type with generics substituted for those provided.
     /// This function defines the base structure of every type, and is used in both
