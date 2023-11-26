@@ -58,7 +58,7 @@ pub fn inline_ref<T: Type>(_: &T, conf: &ExportConfig) -> Output {
 /// Eg. `{ demo: string; };`
 pub fn inline<T: Type>(conf: &ExportConfig) -> Output {
     let mut type_map = TypeMap::default();
-    let ty = T::inline(&mut type_map, &[]);
+    let ty = T::inline(&mut type_map);
     is_valid_ty(&ty, &type_map)?;
     let result = datatype(conf, &ty, &type_map);
 

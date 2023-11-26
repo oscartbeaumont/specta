@@ -34,7 +34,7 @@ use crate::{DataType, Type, TypeMap};
 pub struct Any<T = ()>(T);
 
 impl<T> Type for Any<T> {
-    fn inline(_: &mut TypeMap, _: &[DataType]) -> DataType {
+    fn inline(_: &mut TypeMap) -> DataType {
         DataType::Any
     }
 }
@@ -91,7 +91,7 @@ impl<T: serde::Serialize> serde::Serialize for Any<T> {
 pub struct Unknown<T = ()>(T);
 
 impl<T> Type for Unknown<T> {
-    fn inline(_: &mut TypeMap, _: &[DataType]) -> DataType {
+    fn inline(_: &mut TypeMap) -> DataType {
         DataType::Unknown
     }
 }

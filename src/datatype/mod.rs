@@ -94,9 +94,6 @@ pub enum DeprecatedType {
 /// This works since a child type that references a parent type does not care about the
 /// parent's fields, only really its name. Once all of the parent's fields have been
 /// resolved will the parent's definition be placed in the type map.
-///
-// This doesn't account for flattening and inlining recursive types, however, which will
-// require a more complex solution since it will require multiple processing stages.
 #[derive(Debug, Clone, PartialEq)]
 pub struct DataTypeReference {
     pub(crate) name: Cow<'static, str>,

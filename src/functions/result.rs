@@ -13,7 +13,7 @@ mod private {
     pub enum SpectaFunctionResultMarker {}
     impl<T: Type> SpectaFunctionResult<SpectaFunctionResultMarker> for T {
         fn to_datatype(type_map: &mut TypeMap) -> DataType {
-            T::reference(type_map, &[]).inner
+            T::reference(type_map).inner
         }
     }
 
@@ -24,7 +24,7 @@ mod private {
         F::Output: Type,
     {
         fn to_datatype(type_map: &mut TypeMap) -> DataType {
-            F::Output::reference(type_map, &[]).inner
+            F::Output::reference(type_map).inner
         }
     }
 }

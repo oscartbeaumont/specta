@@ -40,10 +40,7 @@ pub fn parse_enum(
         quote! {
             (
                 std::borrow::Cow::Borrowed(#ident_str).into(),
-                generics
-                    .get(#i)
-                    .cloned()
-                    .unwrap_or_else(|| <#ident as #crate_ref::Type>::reference(type_map, &[]).inner)
+                <#ident as #crate_ref::Type>::reference(type_map).inner
             )
         }
     });

@@ -45,5 +45,5 @@ pub fn register_ty<T: Type>() {
     let type_map = &mut *TYPES.write().unwrap_or_else(PoisonError::into_inner);
 
     // We call this for it's side effects on the `type_map`
-    T::reference(type_map, &[]);
+    T::reference(type_map);
 }

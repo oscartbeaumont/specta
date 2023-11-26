@@ -15,7 +15,7 @@ mod private {
 
     impl<T: Type> SpectaFunctionArg<FunctionArgMarker> for T {
         fn to_datatype(type_map: &mut TypeMap) -> Option<DataType> {
-            Some(T::reference(type_map, &[]).inner)
+            Some(T::reference(type_map).inner)
         }
     }
 

@@ -130,22 +130,22 @@ pub fn derive(input: proc_macro::TokenStream) -> syn::Result<proc_macro::TokenSt
         const _: () = {
         	const SID: #crate_ref::SpectaID = #sid;
 	        const IMPL_LOCATION: #crate_ref::ImplLocation = #impl_location;
-            const DEFINITION_GENERICS: &[#crate_ref::DataType] = &[#(#definition_generics),*];
+            // const DEFINITION_GENERICS: &[#crate_ref::DataType] = &[#(#definition_generics),*]; // TODO: Now unused
 
             #[automatically_derived]
             #type_impl_heading {
-                fn inline(type_map: &mut #crate_ref::TypeMap, generics: &[#crate_ref::DataType]) -> #crate_ref::DataType {
+                fn inline(type_map: &mut #crate_ref::TypeMap) -> #crate_ref::DataType {
                     #inlines
                 }
 
                 fn definition(type_map: &mut #crate_ref::TypeMap) -> #crate_ref::DataType {
                     Self::inline(
                         type_map,
-                        &DEFINITION_GENERICS
+                        // &DEFINITION_GENERICS
                     )
                 }
 
-                fn reference(type_map: &mut #crate_ref::TypeMap, generics: &[#crate_ref::DataType]) -> #crate_ref::reference::Reference {
+                fn reference(type_map: &mut #crate_ref::TypeMap) -> #crate_ref::reference::Reference {
                     #reference
                 }
             }
@@ -155,21 +155,21 @@ pub fn derive(input: proc_macro::TokenStream) -> syn::Result<proc_macro::TokenSt
 	            const SID: #crate_ref::SpectaID = SID;
 	            const IMPL_LOCATION: #crate_ref::ImplLocation = IMPL_LOCATION;
 
-                fn named_data_type(type_map: &mut #crate_ref::TypeMap, generics: &[#crate_ref::DataType]) -> #crate_ref::NamedDataType {
+                fn named_data_type(type_map: &mut #crate_ref::TypeMap) -> #crate_ref::NamedDataType {
                     #crate_ref::internal::construct::named_data_type(
                         #name.into(),
                         #comments.into(),
                         #deprecated,
                         SID,
                         IMPL_LOCATION,
-                        <Self as #crate_ref::Type>::inline(type_map, generics)
+                        <Self as #crate_ref::Type>::inline(type_map)
                     )
                 }
 
                 fn definition_named_data_type(type_map: &mut #crate_ref::TypeMap) -> #crate_ref::NamedDataType {
                     Self::named_data_type(
                         type_map,
-                        &DEFINITION_GENERICS
+                        // &DEFINITION_GENERICS
                     )
                 }
             }
