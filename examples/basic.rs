@@ -62,4 +62,7 @@ fn main() {
         ts_str,
         r#"export type Something = { a: { [key in MyEnum]: number } }"#.to_string()
     );
+
+    let ts_str = ts::inline::<specta_impls::Testing>(&ExportConfig::default()).unwrap();
+    println!("{ts_str}");
 }
