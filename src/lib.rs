@@ -22,6 +22,7 @@ pub mod export;
 #[cfg_attr(docsrs, doc(cfg(feature = "functions")))]
 pub mod functions;
 mod lang;
+mod registry;
 mod selection;
 mod serde;
 mod static_types;
@@ -33,6 +34,7 @@ pub use crate::serde::*;
 pub use datatype::*;
 pub use lang::*;
 pub use r#type::*;
+pub use registry::Registry;
 pub use selection::*;
 pub use static_types::*;
 

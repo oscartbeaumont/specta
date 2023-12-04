@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use crate::{DataType, DeprecatedType, ImplLocation, SpectaID};
+use crate::{DataType, DeprecatedType, ImplLocation, ModulePath, SpectaID};
 
 /// A NamedDataTypeImpl includes extra information which is only available for [NamedDataType]'s that come from a real Rust type.
 #[derive(Debug, Clone, PartialEq)]
@@ -9,6 +9,8 @@ pub struct NamedDataTypeExt {
     pub(crate) sid: SpectaID,
     /// The code location where this type is implemented. Used for error reporting.
     pub(crate) impl_location: ImplLocation,
+    /// The Rust module where the type was defined.
+    pub(crate) module_path: ModulePath,
 }
 
 impl NamedDataTypeExt {

@@ -130,6 +130,7 @@ pub fn derive(input: proc_macro::TokenStream) -> syn::Result<proc_macro::TokenSt
         const _: () = {
         	const SID: #crate_ref::SpectaID = #sid;
 	        const IMPL_LOCATION: #crate_ref::ImplLocation = #impl_location;
+            const MODULE_PATH: #crate_ref::ModulePath = #crate_ref::internal::construct::module_path(module_path!());
             const DEFINITION_GENERICS: &[#crate_ref::DataType] = &[#(#definition_generics),*];
 
             #[automatically_derived]
@@ -162,6 +163,7 @@ pub fn derive(input: proc_macro::TokenStream) -> syn::Result<proc_macro::TokenSt
                         #deprecated,
                         SID,
                         IMPL_LOCATION,
+                        MODULE_PATH,
                         <Self as #crate_ref::Type>::inline(type_map, generics)
                     )
                 }

@@ -12,6 +12,9 @@ pub use ctor;
 #[cfg(feature = "functions")]
 pub use specta_macros::fn_datatype;
 
+mod intersperse;
+pub use intersperse::*;
+
 use crate::{DataType, Field, SpectaID, Type, TypeMap};
 
 /// Functions used to construct `crate::datatype` types (they have private fields so can't be constructed directly).
@@ -20,7 +23,7 @@ use crate::{DataType, Field, SpectaID, Type, TypeMap};
 pub mod construct {
     use std::borrow::Cow;
 
-    use crate::{datatype::*, ImplLocation, SpectaID};
+    use crate::{datatype::*, ImplLocation, ModulePath, SpectaID};
 
     pub const fn field(
         optional: bool,
@@ -120,13 +123,18 @@ pub mod construct {
         deprecated: Option<DeprecatedType>,
         sid: SpectaID,
         impl_location: ImplLocation,
+        module_path: ModulePath,
         inner: DataType,
     ) -> NamedDataType {
         NamedDataType {
             name,
             docs,
             deprecated,
-            ext: Some(NamedDataTypeExt { sid, impl_location }),
+            ext: Some(NamedDataTypeExt {
+                sid,
+                impl_location,
+                module_path,
+            }),
             inner,
         }
     }
@@ -153,6 +161,10 @@ pub mod construct {
 
     pub const fn impl_location(loc: &'static str) -> ImplLocation {
         ImplLocation(loc)
+    }
+
+    pub const fn module_path(path: &'static str) -> ModulePath {
+        ModulePath(path)
     }
 
     /// Compute an SID hash for a given type.

@@ -135,6 +135,10 @@ fn export_datatype_inner(
             .unwrap_or_else(|| PathItem::Type(name.clone())),
     );
     let name = sanitise_type_name(ctx.clone(), NamedLocation::Type, name)?;
+    let name = ctx
+        .cfg
+        .layout
+        .construct_name_from_ext(&name.into(), None, ext);
 
     let generics = item
         .generics()
@@ -270,20 +274,24 @@ pub(crate) fn datatype_inner(ctx: ExportContext, typ: &DataType, type_map: &Type
             variants.dedup();
             variants.join(" | ")
         }
-        DataType::Reference(DataTypeReference { name, generics, .. }) => match &generics[..] {
-            [] => name.to_string(),
-            generics => {
-                let generics = generics
-                    .iter()
-                    .map(|(_, v)| {
-                        datatype_inner(ctx.with(PathItem::Type(name.clone())), v, type_map)
-                    })
-                    .collect::<Result<Vec<_>>>()?
-                    .join(", ");
+        DataType::Reference(r @ DataTypeReference { name, generics, .. }) => {
+            let name = ctx.cfg.layout.construct_name_from_ref(name, r, type_map);
 
-                format!("{name}<{generics}>")
+            match &generics[..] {
+                [] => name.to_string(),
+                generics => {
+                    let generics = generics
+                        .iter()
+                        .map(|(_, v)| {
+                            datatype_inner(ctx.with(PathItem::Type(name.clone())), v, type_map)
+                        })
+                        .collect::<Result<Vec<_>>>()?
+                        .join(", ");
+
+                    format!("{name}<{generics}>")
+                }
             }
-        },
+        }
         DataType::Generic(GenericType(ident)) => ident.to_string(),
     })
 }
