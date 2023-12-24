@@ -22,6 +22,7 @@ pub enum LiteralType {
     String(String),
     char(char),
     /// Standalone `null` without a known type
+    // TODO: Remove this
     None,
 }
 

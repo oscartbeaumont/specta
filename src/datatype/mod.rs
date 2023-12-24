@@ -29,24 +29,24 @@ use crate::SpectaID;
 /// A language exporter takes this general format and converts it into a language specific syntax.
 #[derive(Debug, Clone, PartialEq)]
 pub enum DataType {
-    // Always inlined
-    Any,
-    Unknown,
+    Nullable(Box<DataType>),
     Primitive(PrimitiveType),
     Literal(LiteralType),
-    /// Either a `Set` or a `Vec`
     List(List),
-    Nullable(Box<DataType>),
     Map(Box<(DataType, DataType)>),
-    // Anonymous Reference types
-    Struct(StructType),
     Enum(EnumType),
     Tuple(TupleType),
-    // Result
-    Result(Box<(DataType, DataType)>),
-    // A reference type that has already been defined
     Reference(DataTypeReference),
     Generic(GenericType),
+
+    // TODO: Should we keep this - https://github.com/oscartbeaumont/specta/issues/192
+    Result(Box<(DataType, DataType)>),
+
+    // TODO: Remove these
+    Any,
+    Unknown,
+    Struct(StructType),
+    // Named(NamedDataType)
 }
 
 impl DataType {
