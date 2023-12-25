@@ -18,6 +18,7 @@ pub struct EnumAttr {
     pub tag: Option<String>,
     pub content: Option<String>,
     pub untagged: bool,
+    pub always_inline: bool,
     // This property is not covered by sem-ver and *should* not be used.
     pub unstable_skip_bigint_checks: bool,
 }
