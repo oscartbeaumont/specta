@@ -45,3 +45,33 @@ pub fn fn_datatype(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         .unwrap_or_else(|err| err.into_compile_error())
         .into()
 }
+
+#[proc_macro_attribute]
+// #[cfg(test)] // TODO: Require special internal feature so it's not for user's tests
+pub fn stest(
+    args: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    use quote::quote;
+    use syn::{parse_macro_input, ItemFn};
+
+    let args: proc_macro2::TokenStream = args.into();
+
+    let function = match parse_macro_input::parse::<ItemFn>(item) {
+        Ok(function) => function,
+        Err(err) => return err.into_compile_error().into(),
+    };
+    let function_ident = function.sig.ident.clone();
+
+    quote! {
+        #[test]
+        #[ignore]
+        #[cfg(not(#args))]
+        fn #function_ident() {}
+
+        #[test]
+        #[cfg(#args)]
+        #function
+    }
+    .into()
+}

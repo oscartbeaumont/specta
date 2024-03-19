@@ -1,5 +1,4 @@
-#[test]
-#[cfg(feature = "glam")]
+#[specta_macros::stest(feature = "glam")]
 fn typescript_types_glam() {
     use crate::ts::assert_ts;
 
