@@ -1,4 +1,6 @@
-use std::cmp::Ordering;
+use std::{any::TypeId, cmp::Ordering};
+
+use crate::internal::type_id::non_static_type_id;
 
 /// The unique Specta ID for the type.
 ///
@@ -10,11 +12,35 @@ use std::cmp::Ordering;
 ///  - `&'a T::SID == &'b T::SID` (unlike std::any::TypeId which forces a static lifetime)
 ///  - `Box<T> == Arc<T> == Rc<T>` (unlike std::any::TypeId)
 ///
+// TODO: Encode the properties above into unit tests.
 #[allow(clippy::derived_hash_with_manual_eq)]
 #[derive(Debug, Clone, Copy, Hash)]
 pub struct SpectaID {
     pub(crate) type_name: &'static str,
-    pub(crate) hash: u64,
+    pub(crate) tid: TypeId,
+}
+
+impl SpectaID {
+    // TODO: Unit test this (including with non-static types)
+    pub fn from<T>() -> Self {
+        // I am aware `std::any::type_name`'s format is not guaranteed but plz just let me order my types by name without a macro in peace.
+        let type_name = std::any::type_name::<T>(); // Current output is in the form `some::Type<some::Generic>`
+
+        // Strip from `<` to the end of the string
+        let end_offset = type_name.rfind("<").unwrap_or(type_name.len());
+
+        // Strip everything before the last `::`
+        let start_offset = type_name[0..end_offset]
+            .rfind("::")
+            // +2 to skip the ::
+            .map(|v| v + 2)
+            .unwrap_or(0);
+
+        SpectaID {
+            type_name: &type_name[start_offset..end_offset],
+            tid: non_static_type_id::<T>(),
+        }
+    }
 }
 
 // We do custom impls so the order prefers type_name over hash.
@@ -22,7 +48,7 @@ impl Ord for SpectaID {
     fn cmp(&self, other: &Self) -> Ordering {
         self.type_name
             .cmp(other.type_name)
-            .then(self.hash.cmp(&other.hash))
+            .then(self.tid.cmp(&other.tid))
     }
 }
 
@@ -39,7 +65,7 @@ impl Eq for SpectaID {}
 // We do custom impls so equals is by SID exclusively.
 impl PartialEq<Self> for SpectaID {
     fn eq(&self, other: &Self) -> bool {
-        self.hash.eq(&other.hash)
+        self.tid.eq(&other.tid)
     }
 }
 

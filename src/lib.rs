@@ -1,5 +1,5 @@
 #![doc = include_str!("./docs.md")]
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![warn(clippy::all, clippy::unwrap_used, clippy::panic)] // TODO: missing_docs
 #![allow(clippy::module_inception)]
 #![cfg_attr(docsrs, feature(doc_cfg))]

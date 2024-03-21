@@ -154,33 +154,6 @@ pub mod construct {
     pub const fn impl_location(loc: &'static str) -> ImplLocation {
         ImplLocation(loc)
     }
-
-    /// Compute an SID hash for a given type.
-    /// This will produce a type hash from the arguments.
-    /// This hashing function was derived from https://stackoverflow.com/a/71464396
-    pub const fn sid(type_name: &'static str, type_identifier: &'static str) -> SpectaID {
-        let mut hash = 0xcbf29ce484222325;
-        let prime = 0x00000100000001B3;
-
-        let mut bytes = type_name.as_bytes();
-        let mut i = 0;
-
-        while i < bytes.len() {
-            hash ^= bytes[i] as u64;
-            hash = hash.wrapping_mul(prime);
-            i += 1;
-        }
-
-        bytes = type_identifier.as_bytes();
-        i = 0;
-        while i < bytes.len() {
-            hash ^= bytes[i] as u64;
-            hash = hash.wrapping_mul(prime);
-            i += 1;
-        }
-
-        SpectaID { type_name, hash }
-    }
 }
 
 pub type NonSkipField<'a> = (&'a Field, &'a DataType);
@@ -249,3 +222,34 @@ mod functions {
 }
 #[cfg(feature = "functions")]
 pub use functions::*;
+
+// This code is taken from `erased-serde` - https://github.com/dtolnay/erased-serde/blob/master/src/any.rs
+#[allow(unsafe_code)]
+pub(crate) mod type_id {
+    use std::{any::TypeId, marker::PhantomData};
+
+    trait NonStaticAny {
+        fn get_type_id(&self) -> TypeId
+        where
+            Self: 'static;
+    }
+
+    impl<T: ?Sized> NonStaticAny for PhantomData<T> {
+        fn get_type_id(&self) -> TypeId
+        where
+            Self: 'static,
+        {
+            TypeId::of::<T>()
+        }
+    }
+
+    pub fn non_static_type_id<T: ?Sized>() -> TypeId {
+        let non_static_thing = PhantomData::<T>;
+        let thing = unsafe {
+            std::mem::transmute::<&dyn NonStaticAny, &(dyn NonStaticAny + 'static)>(
+                &non_static_thing,
+            )
+        };
+        NonStaticAny::get_type_id(thing)
+    }
+}
