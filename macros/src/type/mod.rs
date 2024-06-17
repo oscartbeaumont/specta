@@ -44,7 +44,7 @@ pub fn derive(input: proc_macro::TokenStream) -> syn::Result<proc_macro::TokenSt
         unraw_raw_ident(&format_ident!("{}", raw_ident.to_string())).to_token_stream()
     });
 
-    let sid = quote!(#crate_ref::internal::construct::sid(#name, concat!("::", module_path!(), ":", line!(), ":", column!())));
+    let sid = quote!(#crate_ref::SpectaID::from::<Self>());
     let (inlines, reference, can_flatten) = match data {
         Data::Struct(data) => {
             parse_struct(&name, &container_attrs, generics, &crate_ref, &sid, data)
