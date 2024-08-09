@@ -31,3 +31,4 @@ specta = { version = "=2.0.0-rc.20", path = "../specta" }
 specta-macros = { version = "=2.0.0-rc.17", path = "../specta-macros", default-features = false, optional = true }
 ctor = { version = "0.2.8", default-features = false, optional = true }
 serde = "1.0.204"  # TODO: Can we remove this or at least make it optional behind the `serde` flag
+serde_json = "1" # TODO: Remove this or make it optional
